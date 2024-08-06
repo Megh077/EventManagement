@@ -7,6 +7,7 @@ const EventTasks = () => {
     const [statusArray, setStatusArray] = useState({});
     const [selectedEventId, setSelectedEventId] = useState(localStorage.getItem('selectedEventId'));
     const statusArrayKey = 'statusArray';
+
     const fetchTaskData = () => {
         const taskFileContent = localStorage.getItem('taskFile');
         if (taskFileContent) {
@@ -20,8 +21,7 @@ const EventTasks = () => {
     };
 
     useEffect(() => {
-       fetchTaskData();
-       console.log('Status Array:', statusArray);
+        fetchTaskData();
         getStatusArray();
     }, []);
 
@@ -38,30 +38,27 @@ const EventTasks = () => {
     const initializeStatusArray = (taskData) => {
         const currentStatusArray = JSON.parse(localStorage.getItem('statusArray') || '{}');
         const currentEventStatus = JSON.parse(localStorage.getItem('currentEventStatus') || '{}');
-      
+
         taskData.forEach(item => {
-          if (!currentStatusArray[item.eventid]) {
-            currentStatusArray[item.eventid] = 'Not Started'; 
-          }
-          if (currentEventStatus[item.eventid]) {
-            currentStatusArray[item.eventid] = currentEventStatus[item.eventid];
-          }
+            if (!currentStatusArray[item.eventid]) {
+                currentStatusArray[item.eventid] = {};
+            }
+            if (!currentStatusArray[item.eventid][item.taskname]) {
+                const eventStatus = currentEventStatus[item.eventid] || 'Not Started';
+                currentStatusArray[item.eventid][item.taskname] = eventStatus;
+            }
         });
-      
+
         localStorage.setItem('statusArray', JSON.stringify(currentStatusArray));
         setStatusArray(currentStatusArray);
-      };
-
-     
-      
-      
-      
+    };
 
     const getEventStatus = (eventId) => {
         if (!statusArray[eventId]) return { allCompleted: false, inProgress: false };
 
         const statuses = Object.values(statusArray[eventId]);
-        const allCompleted = statuses.every(status => status === 'Completed');
+        const statusesWithoutLast = statuses.slice(0, -1);
+        const allCompleted = statusesWithoutLast.every(status => status === 'Completed');
         const inProgress = statuses.some(status => status === 'In Progress');
 
         return { allCompleted, inProgress };
@@ -69,37 +66,28 @@ const EventTasks = () => {
 
     const updateTaskStatus = (eventId, taskName, status) => {
         const updatedStatusArray = { ...statusArray };
-        const eventFileContent = localStorage.getItem('eventFile');
-        if (eventFileContent) {
-            const jsonData = JSON.parse(eventFileContent);
-            const event = jsonData.find(item => item['eventid'] === eventId);
-            const startDate = new Date(event['startdate']);
-            const endDate = new Date(event['enddate']);
-            const currentDate = new Date();
-            let eventStatus;
-            if (currentDate >= startDate && currentDate <= endDate) {
-                eventStatus = 'In Progress';
-            } else if (currentDate > endDate) {
-                eventStatus = 'Failed';
-            } else if (currentDate < startDate) {
-                eventStatus = 'Not Started';
-            }
-
-            if (eventStatus === 'Failed') {
-                return;
-            }
-        }
 
         if (!updatedStatusArray[eventId]) {
             updatedStatusArray[eventId] = {};
         }
+
         updatedStatusArray[eventId][taskName] = status;
-        saveStatusArray(updatedStatusArray);
-        setStatusArray(updatedStatusArray);
 
         const { allCompleted, inProgress } = getEventStatus(eventId);
 
-        updateEventStatusInDisplay(eventId, inProgress ? 'In Progress' : allCompleted ? 'Completed' : 'Not Started');
+        let eventStatus = 'Not Started';
+        if (allCompleted) {
+            eventStatus = 'Completed';
+        } else if (inProgress) {
+            eventStatus = 'In Progress';
+        }
+
+        updatedStatusArray[eventId].status = eventStatus;
+
+        saveStatusArray(updatedStatusArray);
+        setStatusArray(updatedStatusArray);
+
+        updateEventStatusInDisplay(eventId, eventStatus);
     };
 
     const updateEventStatusInDisplay = (eventId, status) => {
@@ -113,7 +101,6 @@ const EventTasks = () => {
                 return item;
             });
             localStorage.setItem('eventFile', JSON.stringify(updatedData));
-            // Here, you might need to trigger a re-render or update some part of the UI to reflect changes
         }
     };
 

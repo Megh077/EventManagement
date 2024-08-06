@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState} from 'react'; 
 import EventHeader from '../components/EventHeader';
 import ContentArea from '../components/ContentArea'; 
-
+import { useNavigate } from 'react-router-dom';
 const Importation = () => {
-  const [eventFileContent, setEventFileContent] = useState('');
-  const [taskFileContent, setTaskFileContent] = useState('');
+  // const [eventFileContent, setEventFileContent] = useState('');
+  // const [taskFileContent, setTaskFileContent] = useState('');
+  const nav = useNavigate();
   const [eventUploaded, setEventUploaded] = useState(false);
   const [taskUploaded, setTaskUploaded] = useState(false);
-
   const expectedEventHeaders = ['eventid', 'eventname', 'startdate', 'enddate'];
   const expectedTaskHeaders = ['eventid', 'taskname'];
 
@@ -53,25 +53,26 @@ const Importation = () => {
         return;
       }
       localStorage.setItem('eventFile', JSON.stringify(jsonData));
-      const currentEventStatus = {};
-      const currentDate = new Date();
-      jsonData.forEach(event => {
-      const startDate = new Date(event['startdate']);
-      const endDate = new Date(event['enddate']);
-      let status;
-      if (currentDate >= startDate && currentDate <= endDate) {
-        status = 'In Progress';
-    } else if (currentDate > endDate) {
-      status = 'Failed';
-    } else if (currentDate < startDate) {
-      status = 'Not Started';
-    }
-    currentEventStatus[event.eventid] = status;
-  });
-  localStorage.setItem('currentEventStatus', JSON.stringify(currentEventStatus));
+  //     const currentEventStatus = {};
+  //     const currentDate = new Date();
+  //     jsonData.forEach(event => {
+  //     const startDate = new Date(event['startdate']);
+  //     const endDate = new Date(event['enddate']);
+  //     let status;
+  //     if (currentDate >= startDate && currentDate <= endDate) {
+  //       status = 'In Progress';
+  //   } else if (currentDate > endDate) {
+  //     status = 'Failed';
+  //   } else if (currentDate < startDate) {
+  //     status = 'Not Started';
+  //   }
+  //   currentEventStatus[event.eventid] = status;
+  // });
+  // localStorage.setItem('currentEventStatus', JSON.stringify(currentEventStatus));
 
       setEventUploaded(true);
       showWarningModal("Event file uploaded successfully");
+      updateNextPageButtonVisibility();
     };
     reader.readAsText(file);
   };
@@ -100,6 +101,7 @@ const Importation = () => {
       localStorage.setItem('taskFile', JSON.stringify(jsonData));
       setTaskUploaded(true);
       showWarningModal("Task file uploaded successfully");
+      updateNextPageButtonVisibility()
     };
     reader.readAsText(file);
   };
@@ -143,18 +145,9 @@ const Importation = () => {
   };
 
   const updateNextPageButtonVisibility = () => {
-    const nextPageButton = document.getElementById('nextPageButton');
-    if (nextPageButton) {
-      nextPageButton.style.display = (eventUploaded && taskUploaded) ? 'inline' : 'none';
+    if (taskUploaded && eventUploaded) {
+      document.getElementById('nextPageButton').style.display = 'block';
     }
-  };
-
-  useEffect(() => {
-    updateNextPageButtonVisibility();
-  }, [eventUploaded, taskUploaded]);
-
-  const goToNextPage = () => {
-    window.location.href = 'display';
   };
 
   return (
@@ -182,7 +175,7 @@ const Importation = () => {
               <input type="button" value="SUBMIT" onClick={displayEvent} />
             </div>
             <div id="message"></div>
-            <button id="nextPageButton" style={{ display: 'none' }} onClick={goToNextPage}>Next page</button>
+            <button id="nextPageButton"  style={{ display: taskUploaded && eventUploaded ? 'block' : 'none' }} onClick={()=>{nav('/display')}}>Next page</button>
           </div>
         </div>
       </ContentArea>

@@ -63,6 +63,8 @@ body{
 
 #nextPageButton{
   margin-top: 30px;
+  text-align: center;
+  margin-left: 370px;
 }
 
 .event-page{
@@ -104,4 +106,15 @@ th {
   background-color: rgb(60, 114, 64);
   font-weight: bold;
   color: white;
+}
+
+
+.task-page{
+  padding: 1% 0px 0px 0px;
+}
+
+#task-heading{
+  text-align: center;
+  font-weight: bold;
+  color: rgb(129, 15, 15);
 }

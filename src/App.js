@@ -9,7 +9,8 @@ function App() {
     <Routes>
       <Route path="/" element={<Importation/>}/>
       <Route path="/display" element={<Display/>}/>
-      <Route path="/eventTasks" element={<EventTasks/>}/>
+      {/* <Route path="/eventTasks" element={<EventTasks/>}/> */}
+      <Route  path="/eventTasks/:eventId" element={<EventTasks />}/>
     </Routes>
   </Router>
   );
