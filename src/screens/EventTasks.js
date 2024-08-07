@@ -109,40 +109,27 @@ const EventTasks = () => {
         const headers = Object.keys(data[0]);
         return (
             <table>
-                <thead>
-                    <tr>
-                        {headers.map(header => (
-                            <th key={header}>{header}</th>
-                        ))}
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map(item => {
-                        if (item['eventid'] === eventId) {
-                            return (
-                                <tr key={item['taskname']}>
-                                    {headers.map(header => (
-                                        <td key={header}>{item[header]}</td>
-                                    ))}
-                                    <td>
-                                        <select
-                                            value={statusArray[eventId] && statusArray[eventId][item['taskname']] || 'Not Started'}
-                                            onChange={(e) => updateTaskStatus(eventId, item['taskname'], e.target.value)}
-                                        >
-                                            {['Not Started', 'In Progress', 'Completed', 'Failed'].map(option => (
-                                                <option key={option} value={option}>
-                                                    {option}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </td>
-                                </tr>
-                            );
-                        }
-                        return null;
-                    })}
-                </tbody>
+            <thead>
+            <tr>
+            {headers.map(header => (
+            <th key={header}>{header}</th>))}
+            <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {data.map(item => {
+            if (item['eventid'] === eventId) {
+            return (
+            <tr key={item['taskname']}>
+            {headers.map(header => (
+            <td key={header}>{item[header]}</td>))}
+            <td>
+            <select value={statusArray[eventId] && statusArray[eventId][item['taskname']] || 'Not Started'}
+            onChange={(e) => updateTaskStatus(eventId, item['taskname'], e.target.value)}>
+            {['Not Started', 'In Progress', 'Completed', 'Failed'].map(option => (<option key={option} value={option}>
+            {option}</option>))}
+            </select></td></tr>);}return null;})}
+            </tbody>
             </table>
         );
     };
