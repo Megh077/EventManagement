@@ -54,14 +54,13 @@ const EventTasks = () => {
     };
 
     const getEventStatus = (eventId) => {
-        if (!statusArray[eventId]) return { allCompleted: false, inProgress: false };
-
+        if (!statusArray[eventId]) return { allCompleted: false, inProgress: false, allFailed: false };
         const statuses = Object.values(statusArray[eventId]);
         const statusesWithoutLast = statuses.slice(0, -1);
         const allCompleted = statusesWithoutLast.every(status => status === 'Completed');
-        const inProgress = statuses.some(status => status === 'In Progress');
-
-        return { allCompleted, inProgress };
+        const inProgress = statusesWithoutLast.some(status => status === 'In Progress');
+        const allFailed = statusesWithoutLast.every(status => status === 'Failed');
+        return { allCompleted, inProgress, allFailed };
     };
 
     const updateTaskStatus = (eventId, taskName, status) => {
@@ -73,21 +72,22 @@ const EventTasks = () => {
 
         updatedStatusArray[eventId][taskName] = status;
 
-        const { allCompleted, inProgress } = getEventStatus(eventId);
+        const { allCompleted, inProgress, allFailed } = getEventStatus(eventId);
 
         let eventStatus = 'Not Started';
         if (allCompleted) {
             eventStatus = 'Completed';
         } else if (inProgress) {
             eventStatus = 'In Progress';
+        } else if (allFailed) {
+            eventStatus = 'Failed';
         }
 
         updatedStatusArray[eventId].status = eventStatus;
+        updateEventStatusInDisplay(eventId, eventStatus);
 
         saveStatusArray(updatedStatusArray);
         setStatusArray(updatedStatusArray);
-
-        updateEventStatusInDisplay(eventId, eventStatus);
     };
 
     const updateEventStatusInDisplay = (eventId, status) => {
@@ -96,7 +96,7 @@ const EventTasks = () => {
             const jsonData = JSON.parse(eventFileContent);
             const updatedData = jsonData.map(item => {
                 if (item['eventid'] === eventId) {
-                    return { ...item, status };
+                    return { ...item };
                 }
                 return item;
             });
